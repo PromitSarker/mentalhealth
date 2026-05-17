@@ -70,3 +70,17 @@ class SurveyResponse(BaseModel):
 class ReportGenerateRequest(BaseModel):
     """Report generation request - accepts text-based survey responses."""
     survey_responses: list[SurveyResponse] | dict[str, int] = Field(..., description="Survey response data (list of Q&A or numeric dict)")
+
+
+class ConversationSummaryRequest(BaseModel):
+    """Request model for conversation summarization.
+
+    Accepts a list of messages where each message is an object with `role` and `content`.
+    """
+    messages: list[dict] = Field(..., description="List of message objects with 'role' and 'content'")
+
+
+class ConversationSummaryResponse(BaseModel):
+    """Response model for conversation summarization."""
+    summary: str
+    message_count: int

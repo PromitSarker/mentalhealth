@@ -132,6 +132,54 @@ IMPORTANT: You are NOT a substitute for professional mental health care."""
         except Exception as e:
             raise RuntimeError(f"Gemini API error: {str(e)}")
 
+    def summarize_conversation(self, messages: list[dict], max_output_tokens: int = 512) -> str:
+        """Produce a concise, neutral summary of the provided conversation messages.
+
+        Args:
+            messages: List of message dicts with keys `role` and `content`.
+            max_output_tokens: Maximum tokens for the summary output.
+
+        Returns:
+            Summary text.
+        """
+        try:
+            contents = []
+            # Build a neutral system instruction for summarization
+            system_instruction = (
+                "You are a helpful assistant that summarizes conversations. "
+                "Provide a concise (3-6 sentence) neutral summary covering main topics, emotions, "
+                "and suggested follow-up actions if appropriate. Do not diagnose."
+            )
+
+            for msg in messages:
+                contents.append(
+                    types.Content(
+                        role=msg.get("role", "user"),
+                        parts=[types.Part.from_text(text=msg.get("content", ""))],
+                    )
+                )
+
+            # Request summary
+            response = self.client.models.generate_content(
+                model=self.model_name,
+                contents=contents,
+                config=types.GenerateContentConfig(
+                    system_instruction=system_instruction,
+                    temperature=0.2,
+                    top_p=0.9,
+                    max_output_tokens=max_output_tokens,
+                ),
+            )
+
+            if not response or not response.text:
+                self.logger.error(f"Gemini returned empty summary. Response object: {response}")
+                return ""
+
+            return response.text
+
+        except Exception as e:
+            raise RuntimeError(f"Gemini summarization error: {str(e)}")
+
 
 
 

@@ -8,6 +8,7 @@ from services.session_store import get_session_store
 from utils.risk_detection import RiskDetector
 from datetime import datetime
 import logging
+from app.models import ConversationSummaryRequest, ConversationSummaryResponse
 
 
 router = APIRouter(prefix="/ai/chat", tags=["chat"])
@@ -101,3 +102,29 @@ async def clear_session(session_id: str) -> dict:
         "cleared": existed,
         "message": f"Session '{session_id}' cleared." if existed else "Session not found.",
     }
+
+
+@router.post("/summary", response_model=ConversationSummaryResponse, summary="Summarize conversation messages")
+async def summarize_conversation(request: ConversationSummaryRequest) -> ConversationSummaryResponse:
+    """Accept JSON conversation messages and return a concise summary.
+
+    The `messages` payload should be a list of objects with `role` and `content` keys.
+    """
+    try:
+        gemini_service = get_gemini_service()
+
+        # Basic validation
+        msgs = request.messages or []
+        if not isinstance(msgs, list) or len(msgs) == 0:
+            raise ValueError("`messages` must be a non-empty list of message objects")
+
+        summary_text = gemini_service.summarize_conversation(messages=msgs)
+
+        return ConversationSummaryResponse(summary=summary_text or "", message_count=len(msgs))
+
+    except ValueError as ve:
+        logger.error(f"Invalid summarize request: {ve}")
+        raise HTTPException(status_code=400, detail=str(ve))
+    except Exception as e:
+        logger.error(f"Summarization error: {str(e)}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Conversation summarization failed")
