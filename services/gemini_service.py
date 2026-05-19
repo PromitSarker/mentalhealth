@@ -44,7 +44,8 @@ IMPORTANT: You are NOT a substitute for professional mental health care."""
         user_message: str, 
         conversation_history: Optional[list] = None,
         gad7_score: Optional[int] = None,
-        phq9_score: Optional[int] = None
+        phq9_score: Optional[int] = None,
+        language: Optional[str] = None
     ) -> str:
         """Generate therapy-based AI response.
         
@@ -53,6 +54,7 @@ IMPORTANT: You are NOT a substitute for professional mental health care."""
             conversation_history: Previous messages in conversation.
             gad7_score: GAD-7 anxiety score.
             phq9_score: PHQ-9 depression score.
+            language: Desired language for the AI's response.
             
         Returns:
             AI-generated response.
@@ -91,6 +93,9 @@ IMPORTANT: You are NOT a substitute for professional mental health care."""
                 context_str = "\n".join(clinical_context)
                 system_instruction += f"\n\nCURRENT PATIENT CLINICAL CONTEXT:\n{context_str}\n"
                 system_instruction += "ADJUST YOUR APPROACH: For higher scores, prioritize safety, use more frequent validation, and offer more structured, grounded coping strategies. For lower scores, you can be more exploratory."
+
+            if language:
+                system_instruction += f"\n\nIMPORTANT LANGUAGE INSTRUCTION:\nRespond to the user entirely in {language}."
 
             # Generate response with safety settings
             response = self.client.models.generate_content(

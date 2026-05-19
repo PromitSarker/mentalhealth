@@ -14,6 +14,7 @@ class ChatRequest(BaseModel):
         min_length=1,
         max_length=128,
     )
+    language: Optional[str] = Field(None, description="Requested output language (e.g., 'es', 'Spanish')")
     gad7_score: Optional[int] = Field(None, ge=0, le=21, description="GAD-7 Anxiety Score")
     phq9_score: Optional[int] = Field(None, ge=0, le=27, description="PHQ-9 Depression Score")
 

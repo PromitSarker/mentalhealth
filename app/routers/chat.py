@@ -46,6 +46,7 @@ async def chat_interact(request: ChatRequest) -> ChatResponse:
             conversation_history=history,
             gad7_score=request.gad7_score,
             phq9_score=request.phq9_score,
+            language=request.language,
         )
 
         # ── 4. Risk-check the AI response ──────────────────────────────
